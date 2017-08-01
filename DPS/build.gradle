@@ -1,0 +1,34 @@
+apply plugin: 'java'
+
+group 'ademar.dps'
+version '0.0.1'
+
+sourceCompatibility = 1.6
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'main'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
+}
+
+test {
+    testLogging {
+        events 'started', 'passed', 'skipped', 'failed'
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.assertj:assertj-core:3.8.0'
+}
