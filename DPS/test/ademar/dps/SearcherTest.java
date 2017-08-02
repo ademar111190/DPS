@@ -21,6 +21,8 @@ public class SearcherTest {
     @Before
     public void setUp() {
         builder = new Searcher.Builder<Foo>();
+        builder.global(); // Add global algorithm
+        builder.local(); // Add local algorithm
         for (String characteristics : SEARCHER_WRONG) {
             builder.searchable(new Foo(), characteristics);
         }

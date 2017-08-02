@@ -12,12 +12,14 @@ import java.util.regex.Pattern;
  */
 public class Searcher<T> {
 
+    private final List<DynamicProgramming> dynamicProgrammings;
     private final List<CharSequence> characteristics;
     private final List<T> searchables;
     private final double threshold;
     private final boolean normalized;
 
-    private Searcher(List<CharSequence> characteristics, List<T> searchables, double threshold, boolean normalized) {
+    private Searcher(List<DynamicProgramming> dynamicProgrammings, List<CharSequence> characteristics, List<T> searchables, double threshold, boolean normalized) {
+        this.dynamicProgrammings = dynamicProgrammings;
         this.characteristics = characteristics;
         this.searchables = searchables;
         this.threshold = threshold;
@@ -52,8 +54,9 @@ public class Searcher<T> {
             if (searchableScores == null) {
                 searchableScores = new ArrayList<Integer>();
             }
-            searchableScores.add(DynamicProgramming.local(characteristics.get(i), query));
-            searchableScores.add(DynamicProgramming.global(characteristics.get(i), query));
+            for (DynamicProgramming dynamicProgramming : dynamicProgrammings) {
+                searchableScores.add(dynamicProgramming.execute(characteristics.get(i), query));
+            }
             scores.put(hunting, searchableScores);
         }
 
@@ -85,7 +88,7 @@ public class Searcher<T> {
         });
 
         // Verify the minimum allowed score using the threshold and match points
-        double bestScore = DynamicProgramming.DEFAULT_MATCH * query.length();
+        double bestScore = GlobalDynamicProgramming.DEFAULT_MATCH * query.length();
         double minAllowedScore = bestScore * threshold;
 
         // Add every searchable that has enough point to result list
@@ -106,28 +109,63 @@ public class Searcher<T> {
      */
     public static class Builder<T> {
 
+        private List<DynamicProgramming> dynamicProgrammings = new ArrayList<DynamicProgramming>();
         private List<CharSequence> characteristics = new ArrayList<CharSequence>();
         private List<T> searchables = new ArrayList<T>();
         private double threshold = 0.5;
         private boolean normalized = true;
 
         /**
+         * Add a custom DynamicProgramming engine. Useful if you want to search with custom match mismatch and gap values
+         * or with a complete custom DynamicProgramming implementation.
+         *
+         * @param dynamicProgramming a DynamicProgramming instance, if null it is ignored
+         * @return The Builder instance
+         */
+        public Builder<T> dynamicProgramming(DynamicProgramming dynamicProgramming) {
+            if (dynamicProgramming != null) {
+                this.dynamicProgrammings.add(dynamicProgramming);
+            }
+            return this;
+        }
+
+        /**
+         * Add a GlobalDynamicProgramming instance to dynamicProgramming algorithms list
+         *
+         * @return The Builder instance
+         */
+        public Builder<T> global() {
+            return dynamicProgramming(new GlobalDynamicProgramming());
+        }
+
+        /**
+         * Add a LocalDynamicProgramming instance to dynamicProgramming algorithms list
+         *
+         * @return The Builder instance
+         */
+        public Builder<T> local() {
+            return dynamicProgramming(new LocalDynamicProgramming());
+        }
+
+        /**
          * Add an objects of type T to be matched by a characteristic. If searchable is null or characteristic is null it is not added
          *
          * @param searchable     the object that will be ranked and eventually returned when the search is executed
          * @param characteristic the value to be matched with your search query
+         * @return The Builder instance
          */
-        public void searchable(T searchable, CharSequence characteristic) {
+        public Builder<T> searchable(T searchable, CharSequence characteristic) {
             if (searchable != null && characteristic != null) {
                 searchables.add(searchable);
                 characteristics.add(characteristic);
             }
+            return this;
         }
 
         /**
          * The threshold to be used on search.
          * Suppose a query "Hello World" it has 11 characters, and as far as the Searches uses the defaults
-         * DynamicProgramming values, and the default value to a match is 2, the maximum score is 11 * 2 = 22.
+         * GlobalDynamicProgramming values, and the default value to a match is 2, the maximum score is 11 * 2 = 22.
          * Suppose a threshold as 0.3, it means that the minimum allowed score will be 22 * 0.3 = 6,6. It means
          * that any searchable with 6.6 or more will be added into your List result.
          * Corollary: if you pass 0.0 it means all searchables will returns even with no match, you are only ordering it
@@ -158,7 +196,7 @@ public class Searcher<T> {
          * @param normalized true if should normalize the string false otherwise
          * @return The Builder instance
          */
-        public Builder<T> setNormalized(boolean normalized) {
+        public Builder<T> normalized(boolean normalized) {
             this.normalized = normalized;
             return this;
         }
@@ -167,14 +205,20 @@ public class Searcher<T> {
          * Create a Searcher instance with the current builder values
          *
          * @return the Searcher instance
+         * @throws IllegalStateException if you don't add any DynamicProgramming algorithm. You can call global and/or
+         *                               local to add it and/or dynamicProgramming to add a custom implementation
          */
         public Searcher<T> build() {
+            if (dynamicProgrammings.isEmpty()) {
+                throw new IllegalStateException("You need at least one DynamicProgramming instance, " +
+                        "call global and/or local to add it and/or dynamicProgramming to add a custom implementation");
+            }
             if (normalized) {
                 for (int i = 0; i < characteristics.size(); i++) {
                     characteristics.add(i, normalize(characteristics.remove(i)));
                 }
             }
-            return new Searcher<T>(characteristics, searchables, threshold, normalized);
+            return new Searcher<T>(dynamicProgrammings, characteristics, searchables, threshold, normalized);
         }
 
     }
