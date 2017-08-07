@@ -38,6 +38,12 @@ final class MultiplePropertiesExample {
         // Create the searcher builder
         Searcher.Builder<Fruit> builder = new Searcher.Builder<>();
 
+        // Add the local algorithm
+        builder.local();
+
+        // Add the global algorithm
+        builder.global();
+
         // Add the searchables using its name, scientific name and portuguese name to search them
         for (Fruit fruit : fruits) {
             builder.searchable(fruit, fruit.name);

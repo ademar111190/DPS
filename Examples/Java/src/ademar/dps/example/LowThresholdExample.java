@@ -38,6 +38,12 @@ final class LowThresholdExample {
         // Create the searcher builder
         Searcher.Builder<Fruit> builder = new Searcher.Builder<>();
 
+        // Add the local algorithm
+        builder.local();
+
+        // Add the global algorithm
+        builder.global();
+
         // Use a small threshold
         builder.threshold(0.2);
 
