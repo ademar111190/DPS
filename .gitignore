@@ -1,8 +1,12 @@
-.DS_Store
+# folders
 .gradle
 .idea
+build
+out
+
+# files
+.DS_Store
 local.properties
+
+# all files of
 *.iml
-build/
-.navigation/
-out/
