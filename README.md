@@ -35,9 +35,9 @@ Searcher.Builder<Fruit> builder = new Searcher.Builder<>();
 4º Add algorithms, the library provide two (global and local) you can use it or you can implement your own.
 
 ```
-builder.local();
-builder.global();
-builder.dynamicProgramming( _yourALgorithm_ );
+builder.addLocalAlgorithm();
+builder.addGlobalAlgorithm();
+builder.dynamicProgramming( yourOwnAlgorithm );
 ```
 
 5º Add the instaces you want to search and the text to use as term to the instance to be found
