@@ -39,10 +39,10 @@ fun lowThresholdExample() {
     builder.threshold(0.2)
 
     // Add the local algorithm
-    builder.local()
+    builder.addLocalAlgorithm()
 
     // Add the global algorithm
-    builder.global()
+    builder.addGlobalAlgorithm()
 
     // Add the searchables using its name to search them
     fruits.forEach { builder.searchable(it, it.name) }

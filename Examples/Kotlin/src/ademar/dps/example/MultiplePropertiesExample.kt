@@ -38,10 +38,10 @@ fun multiplePropertiesExample() {
     val builder = Searcher.Builder<Fruit>()
 
     // Add the local algorithm
-    builder.local()
+    builder.addLocalAlgorithm()
 
     // Add the global algorithm
-    builder.global()
+    builder.addGlobalAlgorithm()
 
     // Add the searchables using its name, scientific name and portuguese name to search them
     fruits.forEach {

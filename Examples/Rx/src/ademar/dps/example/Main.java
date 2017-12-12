@@ -11,8 +11,8 @@ final class Main {
         Searcher.Builder<Fruit> builder = new Searcher.Builder<Fruit>();
 
         // Add the algorithms
-        builder.local();
-        builder.global();
+        builder.addLocalAlgorithm();
+        builder.addGlobalAlgorithm();
 
         // Add the data to search
         builder.searchable(new Fruit("Apple"), "Apple");

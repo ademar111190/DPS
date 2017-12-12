@@ -36,10 +36,10 @@ fun highThresholdExample() {
     val builder = Searcher.Builder<Fruit>()
 
     // Add the local algorithm
-    builder.local()
+    builder.addLocalAlgorithm()
 
     // Add the global algorithm
-    builder.global()
+    builder.addGlobalAlgorithm()
 
     // Use a high threshold
     builder.threshold(0.8)

@@ -42,10 +42,10 @@ final class HighThresholdExample {
         builder.threshold(0.8);
 
         // Add the local algorithm
-        builder.local();
+        builder.addLocalAlgorithm();
 
         // Add the global algorithm
-        builder.global();
+        builder.addGlobalAlgorithm();
 
         // Add the searchables using its name to search them
         for (Fruit fruit : fruits) {
