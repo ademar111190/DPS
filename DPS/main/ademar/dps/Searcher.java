@@ -1,8 +1,8 @@
 package ademar.dps;
 
-import java.text.Normalizer;
 import java.util.*;
-import java.util.regex.Pattern;
+
+import static ademar.dps.CharSequenceExt.normalize;
 
 /**
  * The class that uses Dynamic Programming to make strings matches, rank it, and using a threshold provides a
@@ -119,13 +119,14 @@ public class Searcher<T> {
          * Add a custom DynamicProgramming engine. Useful if you want to search with custom match mismatch and gap values
          * or with a complete custom DynamicProgramming implementation.
          *
-         * @param dynamicProgramming a DynamicProgramming instance, if null it is ignored
+         * @param dynamicProgramming a DynamicProgramming instance, cannot be null
          * @return The Builder instance
          */
-        public Builder<T> dynamicProgramming(DynamicProgramming dynamicProgramming) {
-            if (dynamicProgramming != null) {
-                this.dynamicProgrammings.add(dynamicProgramming);
+        public Builder<T> addDynamicProgrammingAlgorithm(DynamicProgramming dynamicProgramming) {
+            if (dynamicProgramming == null) {
+                throw new IllegalArgumentException("DynamicProgramming algorithm cannot be null");
             }
+            dynamicProgrammings.add(dynamicProgramming);
             return this;
         }
 
@@ -134,8 +135,9 @@ public class Searcher<T> {
          *
          * @return The Builder instance
          */
-        public Builder<T> global() {
-            return dynamicProgramming(new GlobalDynamicProgramming());
+        public Builder<T> addGlobalAlgorithm() {
+            dynamicProgrammings.add(new GlobalDynamicProgramming());
+            return this;
         }
 
         /**
@@ -143,22 +145,27 @@ public class Searcher<T> {
          *
          * @return The Builder instance
          */
-        public Builder<T> local() {
-            return dynamicProgramming(new LocalDynamicProgramming());
+        public Builder<T> addLocalAlgorithm() {
+            dynamicProgrammings.add(new GlobalDynamicProgramming());
+            return this;
         }
 
         /**
          * Add an objects of type T to be matched by a characteristic. If searchable is null or characteristic is null it is not added
          *
-         * @param searchable     the object that will be ranked and eventually returned when the search is executed
-         * @param characteristic the value to be matched with your search query
+         * @param searchable     the object that will be ranked and eventually returned when the search is executed, cannot be null
+         * @param characteristic the value to be matched with your search query, cannot be null
          * @return The Builder instance
          */
         public Builder<T> searchable(T searchable, CharSequence characteristic) {
-            if (searchable != null && characteristic != null) {
-                searchables.add(searchable);
-                characteristics.add(characteristic);
+            if (searchable == null) {
+                throw new IllegalArgumentException("Searchable cannot be null");
             }
+            if (characteristic == null) {
+                throw new IllegalArgumentException("Characteristic cannot be null");
+            }
+            searchables.add(searchable);
+            characteristics.add(characteristic);
             return this;
         }
 
@@ -211,7 +218,8 @@ public class Searcher<T> {
         public Searcher<T> build() {
             if (dynamicProgrammings.isEmpty()) {
                 throw new IllegalStateException("You need at least one DynamicProgramming instance, " +
-                        "call global and/or local to add it and/or dynamicProgramming to add a custom implementation");
+                        "call addGlobalAlgorithm and/or addLocalAlgorithm to add the defaults algorithms, " +
+                        "and/or addDynamicProgrammingAlgorithm to add a custom implementation");
             }
             if (normalized) {
                 for (int i = 0; i < characteristics.size(); i++) {
@@ -221,18 +229,6 @@ public class Searcher<T> {
             return new Searcher<T>(dynamicProgrammings, characteristics, searchables, threshold, normalized);
         }
 
-    }
-
-    private static CharSequence normalize(CharSequence charSequence) {
-        if (charSequence == null) {
-            return "";
-        } else {
-            return Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
-                    .matcher(Normalizer.normalize(charSequence, Normalizer.Form.NFD))
-                    .replaceAll("")
-                    .toLowerCase()
-                    .trim();
-        }
     }
 
 }
